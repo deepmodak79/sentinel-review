@@ -71,7 +71,7 @@ export default function App() {
         <article><div className="feature-icon"><Activity size={18}/></div><h3>Risk, ranked</h3><p>High, medium, and low severity help you focus on the most consequential patterns.</p></article>
         <article><div className="feature-icon"><Code2 size={18}/></div><h3>Read-only by design</h3><p>SentinelReview inspects public source. It never pushes changes or merges pull requests.</p></article>
       </div>
-      <div className="engine-note"><div><span className="engine-pulse"/><b>DETERMINISTIC ENGINE</b><small>Available now</small></div><div><span className={aiAvailable ? "engine-pulse" : "engine-idle"}/><b>AI REVIEW</b><small>{review ? (review.ai_enabled ? "Gemini review completed" : (review.ai_error || "Not included in this review")) : (aiAvailable ? "Available · opt in above" : "Optional · configure Gemini key on server")}</small></div><ChevronRight size={17}/></div>
+      <div className="engine-note"><div><span className="engine-pulse"/><b>DETERMINISTIC ENGINE</b><small>Available now</small></div><div><span className={aiAvailable ? "engine-pulse" : "engine-idle"}/><b>AI REVIEW</b><small>{aiAvailable ? "Available · opt in above" : "Optional · configure Gemini key on server"}</small></div><ChevronRight size={17}/></div>
     </section>}
 
     <footer><span>© 2026 SENTINELREVIEW</span><span>BUILT TO MAKE CODE SAFER, ONE REVIEW AT A TIME.</span><a href="https://github.com/deepmodak79/sentinel-review" target="_blank" rel="noreferrer">SOURCE CODE <ArrowUpRight size={12}/></a></footer>
