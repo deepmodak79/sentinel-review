@@ -1,21 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Activity, AlertTriangle, ArrowUpRight, CheckCircle2, ChevronRight, Code2, Github, LoaderCircle, LockKeyhole, ScanSearch, ShieldCheck, Terminal } from "lucide-react";
 
 type Finding = { rule_id: string; severity: "high" | "medium" | "low"; title: string; file: string; line: number; evidence: string; recommendation: string };
-type Review = { id: string; repository: string; repository_url: string; branch: string; files_analyzed: number; ai_enabled: boolean; summary: { total: number; high: number; medium: number; low: number }; findings: Finding[] };
+type Review = { id: string; repository: string; repository_url: string; branch: string; files_analyzed: number; ai_enabled: boolean; ai_error?: string | null; summary: { total: number; high: number; medium: number; low: number }; findings: Finding[] };
 
 export default function App() {
   const [url, setUrl] = useState("");
   const [review, setReview] = useState<Review | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState("all");\n  const [aiAvailable, setAiAvailable] = useState(false);\n  const [useAI, setUseAI] = useState(false);\n\n  useEffect(() => {\n    fetch("/api/health").then(response => response.ok ? response.json() : null).then(data => setAiAvailable(Boolean(data?.ai_available))).catch(() => setAiAvailable(false));\n  }, []);
 
   async function runReview(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true); setError(""); setReview(null);
     try {
-      const response = await fetch("/api/reviews", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ repository_url: url }) });
+      const response = await fetch("/api/reviews", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ repository_url: url, use_ai: useAI }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.detail || "Review request failed.");
       setReview(data);
@@ -39,7 +39,7 @@ export default function App() {
         <div className="input-wrap"><Github size={18}/><input aria-label="Public GitHub repository URL" placeholder="https://github.com/owner/repository" value={url} onChange={e => setUrl(e.target.value)} required type="url"/></div>
         <button disabled={loading}>{loading ? <><LoaderCircle className="spin" size={16}/> SCANNING</> : <><ScanSearch size={16}/> REVIEW REPOSITORY <ArrowUpRight size={15}/></>}</button>
       </form>
-      <div className="form-note"><LockKeyhole size={13}/> Public repositories only · Read-only analysis · No code is modified</div>
+      <div className="form-note"><LockKeyhole size={13}/> Public repositories only · Read-only analysis · No code is modified</div>\n      <label className={`ai-opt-in ${!aiAvailable ? "unavailable" : ""}`}><input type="checkbox" checked={useAI} disabled={!aiAvailable || loading} onChange={event => setUseAI(event.target.checked)}/><span><b>Include Gemini-assisted review</b><small>{aiAvailable ? "Sends bounded source excerpts, with common credential patterns redacted, to Google Gemini. Optional; off by default." : "Unavailable until GEMINI_API_KEY is configured on the server. Deterministic checks work without it."}</small></span></label>
       {error && <div className="error" role="alert"><AlertTriangle size={16}/>{error}</div>}
     </section>
 
@@ -64,7 +64,7 @@ export default function App() {
         <article><div className="feature-icon"><Activity size={18}/></div><h3>Risk, ranked</h3><p>High, medium, and low severity help you focus on the most consequential patterns.</p></article>
         <article><div className="feature-icon"><Code2 size={18}/></div><h3>Read-only by design</h3><p>SentinelReview inspects public source. It never pushes changes or merges pull requests.</p></article>
       </div>
-      <div className="engine-note"><div><span className="engine-pulse"/><b>DETERMINISTIC ENGINE</b><small>Available now</small></div><div><span className="engine-idle"/><b>AI REVIEW</b><small>Optional · Configure Gemini key on server</small></div><ChevronRight size={17}/></div>
+      <div className="engine-note"><div><span className="engine-pulse"/><b>DETERMINISTIC ENGINE</b><small>Available now</small></div><div><span className={aiAvailable ? "engine-pulse" : "engine-idle"}/><b>AI REVIEW</b><small>{review ? (review.ai_enabled ? "Gemini review completed" : (review.ai_error || "Not included in this review")) : (aiAvailable ? "Available · opt in above" : "Optional · configure Gemini key on server")}</small></div><ChevronRight size={17}/></div>
     </section>}
 
     <footer><span>© 2026 SENTINELREVIEW</span><span>BUILT TO MAKE CODE SAFER, ONE REVIEW AT A TIME.</span><a href="https://github.com/deepmodak79/sentinel-review" target="_blank" rel="noreferrer">SOURCE CODE <ArrowUpRight size={12}/></a></footer>
