@@ -63,7 +63,7 @@ export default function App() {
         <div className="finding-top"><span className={"severity "+f.severity}>{f.severity}</span><code>{f.rule_id}</code><span className="file">{f.file}:{f.line}</span></div>
         <h4>{f.title}</h4><pre>{f.evidence}</pre><p><b>RECOMMENDATION</b> {f.recommendation}</p>
       </article>)}</div> : <div className="empty"><CheckCircle2 size={22}/><h4>No findings in this severity</h4><p>Try another filter or review a different repository.</p></div>}
-      <p className="disclaimer">Static pattern checks can produce false positives and cannot prove a vulnerability. Validate every finding before acting.</p>
+      <p className="disclaimer">{review.ai_enabled ? "Gemini-assisted review was included. AI findings are advisory and may be incorrect." : review.ai_error ? `Gemini review could not complete: ${review.ai_error} Deterministic results are still available.` : "Static pattern checks can produce false positives and cannot prove a vulnerability. Validate every finding before acting."}</p>
     </section> : <section className="below">
       <div className="below-title"><span>THE REVIEW SURFACE</span><span>BUILT FOR SIGNAL, NOT NOISE</span></div>
       <div className="feature-grid">
