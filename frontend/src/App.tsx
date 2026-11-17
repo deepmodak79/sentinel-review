@@ -9,7 +9,13 @@ export default function App() {
   const [review, setReview] = useState<Review | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [filter, setFilter] = useState("all");\n  const [aiAvailable, setAiAvailable] = useState(false);\n  const [useAI, setUseAI] = useState(false);\n\n  useEffect(() => {\n    fetch("/api/health").then(response => response.ok ? response.json() : null).then(data => setAiAvailable(Boolean(data?.ai_available))).catch(() => setAiAvailable(false));\n  }, []);
+  const [filter, setFilter] = useState("all");
+  const [aiAvailable, setAiAvailable] = useState(false);
+  const [useAI, setUseAI] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/health").then(response => response.ok ? response.json() : null).then(data => setAiAvailable(Boolean(data?.ai_available))).catch(() => setAiAvailable(false));
+  }, []);
 
   async function runReview(event: React.FormEvent) {
     event.preventDefault();
@@ -39,7 +45,8 @@ export default function App() {
         <div className="input-wrap"><Github size={18}/><input aria-label="Public GitHub repository URL" placeholder="https://github.com/owner/repository" value={url} onChange={e => setUrl(e.target.value)} required type="url"/></div>
         <button disabled={loading}>{loading ? <><LoaderCircle className="spin" size={16}/> SCANNING</> : <><ScanSearch size={16}/> REVIEW REPOSITORY <ArrowUpRight size={15}/></>}</button>
       </form>
-      <div className="form-note"><LockKeyhole size={13}/> Public repositories only · Read-only analysis · No code is modified</div>\n      <label className={`ai-opt-in ${!aiAvailable ? "unavailable" : ""}`}><input type="checkbox" checked={useAI} disabled={!aiAvailable || loading} onChange={event => setUseAI(event.target.checked)}/><span><b>Include Gemini-assisted review</b><small>{aiAvailable ? "Sends bounded source excerpts, with common credential patterns redacted, to Google Gemini. Optional; off by default." : "Unavailable until GEMINI_API_KEY is configured on the server. Deterministic checks work without it."}</small></span></label>
+      <div className="form-note"><LockKeyhole size={13}/> Public repositories only · Read-only analysis · No code is modified</div>
+      <label className={`ai-opt-in ${!aiAvailable ? "unavailable" : ""}`}><input type="checkbox" checked={useAI} disabled={!aiAvailable || loading} onChange={event => setUseAI(event.target.checked)}/><span><b>Include Gemini-assisted review</b><small>{aiAvailable ? "Sends bounded source excerpts, with common credential patterns redacted, to Google Gemini. Optional; off by default." : "Unavailable until GEMINI_API_KEY is configured on the server. Deterministic checks work without it."}</small></span></label>
       {error && <div className="error" role="alert"><AlertTriangle size={16}/>{error}</div>}
     </section>
 
